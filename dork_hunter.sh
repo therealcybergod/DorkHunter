@@ -2,20 +2,25 @@
 
 # Function to perform a Google search with a given dork
 perform_search() {
-    dork="$1"
+    local dork="$1"
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     echo "Searching with dork: $dork"
+    echo "Timestamp: $timestamp" >> dorkhunter_log.txt
+    echo "Search query: $dork" >> dorkhunter_log.txt
+    echo "Domain: google.com" >> dorkhunter_log.txt
+    echo "https://www.google.com/search?q=$dork" >> dorkhunter_log.txt
     open "https://www.google.com/search?q=$dork"
 }
 
 # Introducing the script
-echo "Welcome to Dork Hunter!"
-echo "This script uses Google dorks to perform advanced searches for various types of information."
+echo "Welcome to Dork Hunter! This script uses Google dorks to perform advanced searches for various types of information."
+echo "Dork Hunter was created by George K. Ragsdale on June 19th, 2024."
 
 while true; do
     # Prompt the user to start
     read -p "Would you like to begin? (Y/N): " start
     start=$(echo "$start" | tr '[:upper:]' '[:lower:]')
-
+    
     if [[ "$start" != "y" ]]; then
         echo "Exiting Dork Hunter. Have a great day!"
         exit 0
@@ -23,21 +28,20 @@ while true; do
 
     # Ask what the user wants to search for
     echo "What are you searching for?"
-    echo "1) Files"
-    echo "2) Names"
-    echo "3) Usernames"
-    echo "4) Emails"
-    echo "5) Phone numbers"
-    echo "6) Images"
-
-    read -p "Enter the number corresponding to your search category: " search_type
+    echo "1. Files"
+    echo "2. Names"
+    echo "3. Usernames"
+    echo "4. Emails"
+    echo "5. Phone numbers"
+    echo "6. Images"
+    read -p "Enter the number of your choice: " choice
 
     # Get the search query from the user and automatically wrap in quotes
     read -p "Enter your search query: " query
     query="\"$query\""
 
     # Determine the appropriate dork based on search type
-    case $search_type in
+    case $choice in
         1)
             file_types=("pdf" "doc" "docx" "xls" "xlsx" "ppt" "pptx" "txt" "rtf" "odt" "ods" "odp" "xml" "json" "csv" "epub" "mobi" "log" "bak" "cfg" "ini" "php" "asp" "aspx" "jsp" "html")
             for filetype in "${file_types[@]}"; do
@@ -66,12 +70,20 @@ while true; do
                 "$query +\"contact details\""
             )
 
-            # Prompt for location for name searches
-            read -p "Enter a location (e.g., country code top-level domain like .uk, .fr): " location
+            # Ask if user wants to search by country
+            read -p "Would you like to search by country? (Y/N): " search_country
+            search_country=$(echo "$search_country" | tr '[:upper:]' '[:lower:]')
 
-            for search in "${name_searches[@]}"; do
-                perform_search "$search site:$location"
-            done
+            if [[ "$search_country" == "y" ]]; then
+                read -p "Enter a location (e.g., country code top-level domain like .uk, .fr): " location
+                for search in "${name_searches[@]}"; do
+                    perform_search "$search site:$location"
+                done
+            else
+                for search in "${name_searches[@]}"; do
+                    perform_search "$search"
+                done
+            fi
             ;;
         3)
             username_searches=(
